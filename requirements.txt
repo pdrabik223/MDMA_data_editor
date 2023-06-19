@@ -1,0 +1,8 @@
+PyQt6
+pandas
+pyqtgraph
+matplotlib
+
+black
+ruff
+isort
