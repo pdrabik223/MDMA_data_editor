@@ -8,17 +8,23 @@ from PIL import Image
 
 class Heatmap2DWidget(PlotWidget):
     def __init__(self, printer_path=None, title: str = None):
-        super().__init__(plot_type=PlotType.Heatmap2D)
+        super().__init__()
         self.title = title
         # create the color bar for the heatmap
         self.color_bar_widget = pg.GradientWidget(orientation="right")
         self.cax = None
         self.default_view()
 
+    def get_y_lim(self):
+        return self.axes.get_ylim()
+
+    def get_x_lim(self):
+        return self.axes.get_xlim()
+
     def default_view(self):
         self.axes.cla()
         self.add_labels_and_axes_styling()
-    
+
         z = np.empty((50, 50), float)
 
         self.axes.imshow(
@@ -37,8 +43,6 @@ class Heatmap2DWidget(PlotWidget):
         self.axes.set_xlabel("X [mm]")
         self.axes.set_ylabel("Y [mm]")
         self.axes.set_title(self.title)
-
-
 
     def update_from_vna_scan(self, z, part):
         self.axes.cla()
@@ -78,41 +82,36 @@ class Heatmap2DWidget(PlotWidget):
         self.show()
         # self.axes.legend(loc="upper right", fancybox=True)
 
-    def update_from_numpy_array(self, z):
-        self.axes.cla()
-        self.add_labels_and_axes_styling()
-        # Compute the mean of the non-None elements
-
-        local_z = np.array(z, copy=True)
-
-        if not np.isnan(local_z).all():
-            z_mean = np.mean(local_z[~np.isnan(local_z)])
-            local_z[np.isnan(local_z)] = z_mean
-
-        x_min = 0
-        y_min = 0
-        x_max = 50
-        y_max = 50
-
-        self.im = self.axes.imshow(
-            local_z.T,
-            cmap="Wistia",
-            vmin=np.min(local_z),
-            vmax=np.max(local_z),
-            extent=[z.x_min, z.x_max, z.y_min, z.y_max],
-            interpolation="none",
-            origin="lower",
-        )
-
-        if self.cax is not None:
-            self.cax.remove()
-
-        self.divider = make_axes_locatable(self.axes)
-        self.cax = self.divider.append_axes("right", size="5%", pad=0.05)
-        self.color_bar = self.fig.colorbar(self.im, cax=self.cax, orientation="vertical")
-
-        self.axes.set_xlim([x_min, x_max])
-        self.axes.set_ylim([y_min, y_max])
-
-        self.show()
-        # self.axes.legend(loc="upper right", fancybox=True)
+    # def update_from_numpy_array(self, z):
+    #     self.axes.cla()
+    #     self.add_labels_and_axes_styling()
+    #     # Compute the mean of the non-None elements
+    #
+    #     local_z = np.array(z, copy=True)
+    #
+    #     if not np.isnan(local_z).all():
+    #         z_mean = np.mean(local_z[~np.isnan(local_z)])
+    #         local_z[np.isnan(local_z)] = z_mean
+    #
+    #     self.im = self.axes.imshow(
+    #         local_z.T,
+    #         cmap="Wistia",
+    #         vmin=np.min(local_z),
+    #         vmax=np.max(local_z),
+    #         extent=[z.x_min, z.x_max, z.y_min, z.y_max],
+    #         interpolation="none",
+    #         origin="lower",
+    #     )
+    #
+    #     if self.cax is not None:
+    #         self.cax.remove()
+    #
+    #     self.divider = make_axes_locatable(self.axes)
+    #     self.cax = self.divider.append_axes("right", size="5%", pad=0.05)
+    #     self.color_bar = self.fig.colorbar(self.im, cax=self.cax, orientation="vertical")
+    #
+    #     self.axes.set_xlim([x_min, x_max])
+    #     self.axes.set_ylim([y_min, y_max])
+    #
+    #     self.show()
+    #     # self.axes.legend(loc="upper right", fancybox=True)

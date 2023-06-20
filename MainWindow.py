@@ -59,6 +59,10 @@ class RangeInputBox(QWidget):
         else:
             return start, stop
 
+    def set_values(self, start: float, stop: float):
+        self.range_start_box.setText(start)
+        self.range_stop_box.setText(stop)
+
 
 class Settings(QWidget):
     def __init__(self):
@@ -66,6 +70,7 @@ class Settings(QWidget):
 
         self.x_range_input = RangeInputBox(axis_name='X')
         self.y_range_input = RangeInputBox(axis_name='Y')
+        self.from_zoom = QPushButton("From Zoom")
         self.load_btn = QPushButton("Load")
         self.save_btn = QPushButton("Save")
 
@@ -73,14 +78,24 @@ class Settings(QWidget):
         self.setLayout(main_layout)
         main_layout.addWidget(self.x_range_input)
         main_layout.addWidget(self.y_range_input)
+        main_layout.addWidget(self.from_zoom)
         main_layout.addWidget(self.load_btn)
         main_layout.addWidget(self.save_btn)
+
+    def set_x_range(self, start: float, stop: float):
+        self.x_range_input.set_values(start, stop)
+
+    def set_y_range(self, start: float, stop: float):
+        self.y_range_input.set_values(start, stop)
 
     def connect_on_save_btn_press(self, function):
         self.save_btn.pressed.connect(function)
 
     def connect_on_load_btn_press(self, function):
         self.load_btn.pressed.connect(function)
+
+    def connect_on_from_zoom(self, function):
+        self.from_zoom.pressed.connect(function)
 
     def connect_on_edit_finish(self, function):
         self.x_range_input.connect_on_edit_finish(lambda x: function(x, (None, None)))
@@ -108,6 +123,7 @@ class MainWindow(QMainWindow):
         self.main_layout = QGridLayout()
         self.settings_widget = Settings()
         self.settings_widget.connect_on_edit_finish(self.update_frame)
+        self.settings_widget.connect_on_from_zoom(self.from_zoom)
         self.main_layout.addWidget(self.settings_widget, *(0, 0))
 
         widget = QWidget()
@@ -159,17 +175,40 @@ class MainWindow(QMainWindow):
 
         if x_range[0] is not None:
             self.frame_x_start = x_range[0]
+        else:
+            self.frame_x_start = self.plots[0].get_x_lim()[0]
 
         if x_range[1] is not None:
             self.frame_x_end = x_range[1]
+        else:
+            self.frame_x_end = self.plots[0].get_x_lim()[1]
 
         if y_range[0] is not None:
             self.frame_y_start = y_range[0]
+        else:
+            self.frame_y_start = self.plots[0].get_y_lim()[0]
 
         if y_range[1] is not None:
             self.frame_y_end = y_range[1]
+        else:
+            self.frame_y_end = self.plots[0].get_y_lim()[1]
 
         print("self.frame_x_start", self.frame_x_start)
         print("self.frame_x_end", self.frame_x_end)
         print("self.frame_y_start", self.frame_y_start)
         print("self.frame_y_end", self.frame_y_end)
+
+    def from_zoom(self):
+
+        x_ranges = [plot["widget"].get_x_lim() for plot in self.plots]
+
+        x_range_value = [range[1] - range[0] for range in x_ranges]
+
+        x_range = x_ranges[x_range_value.index(min(x_range_value))]
+
+        y_ranges = [plot["widget"].get_y_lim() for plot in self.plots]
+
+        y_range_value = [range[1] - range[0] for range in y_ranges]
+        y_range = y_ranges[y_range_value.index(min(y_range_value))]
+
+        print(x_range, y_range)

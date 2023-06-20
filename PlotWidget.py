@@ -16,28 +16,13 @@ class PlotType(enum.Enum):
 
 
 class PlotWidget(QWidget):
-    def __init__(self, plot_type: PlotType):
+    def __init__(self):
         super().__init__()
 
-        self.fig = Figure(figsize=(6, 6), dpi=90)
-        self.fig.tight_layout()
+        self.fig = Figure(figsize=(0.01, 0.01), dpi=90)
 
-        if plot_type == PlotType.Path3D:
-            self.axes = self.fig.add_subplot(111, projection="3d")
-            self.axes.set_xlabel("Untitled")
-            self.axes.set_ylabel("Untitled")
-            self.axes.set_zlabel("Untitled")
-            self.axes.grid()
-
-        elif plot_type == PlotType.Path2D:
-            self.axes = self.fig.add_subplot(111)
-            self.axes.set_xlabel("Untitled")
-            self.axes.set_ylabel("Untitled")
-            self.axes.grid()
-
-        elif plot_type == PlotType.Heatmap2D:
-            self.axes = self.fig.add_subplot(111)
-
+        self.axes = self.fig.add_subplot(111)
+        self.axes.grid()
         self.axes_styling()
 
         self.main_layout = QVBoxLayout()
@@ -52,7 +37,7 @@ class PlotWidget(QWidget):
 
     def axes_styling(self, window_title="Untitled"):
         self.axes.set_title(window_title)
-        self.axes.axis("square")
+        # self.axes.axis("square")
 
     def show(self):
         self.figure_canvas.draw()
